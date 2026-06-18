@@ -380,7 +380,9 @@
             const palierData = balisticTable[pc];
             if (!palierData) return;
 
-            const baseElevation = palierData.steps[baseRange.toFixed(1)];
+            // CORRECTION ICI : On utilise parseFloat pour chercher une clé numérique (ex: 12 ou 7.2) et non une chaîne "12.0"
+            const searchKey = parseFloat(baseRange.toFixed(1));
+            const baseElevation = palierData.steps[searchKey];
             
             let finalElevation = baseElevation;
 
@@ -398,7 +400,7 @@
 
             // Mettre à jour l'IHM
             document.getElementById('res-charges').innerText = `P.C. ${pc}`;
-            document.getElementById('res-elevation').innerText = isNaN(finalElevation) ? "-" : `${finalElevation.toFixed(2)}°`;
+            document.getElementById('res-elevation').innerText = (baseElevation === undefined || isNaN(finalElevation)) ? "-" : `${finalElevation.toFixed(2)}°`;
             document.getElementById('res-azimut').innerText = isNaN(azimut) ? "-" : `${azimut.toFixed(1)}°`;
             document.getElementById('res-range').innerText = `${baseRange.toFixed(1)} km`;
         }
