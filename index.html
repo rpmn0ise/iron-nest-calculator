@@ -6,29 +6,29 @@
     <title>Iron Nest - Balistic Calculator</title>
     <style>
         :root {
-            /* --- THEME SOMBRE RADICAL (Bunker / Nuit) --- */
-            --bg-color: #0d0c0a;        /* Noir d'encre militaire très profond */
-            --panel-bg: #161412;        /* Gris-brun très sombre (acier/cuir vieilli) */
-            --text-color: #abb2a0;      /* Vert-gris pâle (style vision nocturne / texte militaire estompé) */
-            --text-muted: #646b5c;      /* Texte secondaire très sombre */
-            --accent-color: #d1361b;    /* Rouge alerte / Tampon lumineux */
-            --accent-hover: #ff4524;    
-            --border-color: #2b2621;    /* Bordure sombre et discrète */
-            --input-bg: #100f0d;        /* Entrées quasi noires */
-            --header-bg: #090807;       
-            --header-text: #8e9685;
-            --highlight-bg: rgba(209, 54, 27, 0.1);
+            /* --- THEME SOMBRE RADICAL (Bunker de nuit) --- */
+            --bg-color: #050505;        /* Presque noir pur */
+            --panel-bg: #0c0b0a;        /* Gris-brun extrêmement sombre */
+            --text-color: #9fa695;      /* Vert-gris militaire nocturne */
+            --text-muted: #4e5447;      /* Texte secondaire très effacé */
+            --accent-color: #c42a14;    /* Rouge alerte sombre */
+            --accent-hover: #fa3c20;    
+            --border-color: #1a1816;    /* Bordures très sombres */
+            --input-bg: #070606;        
+            --header-bg: #030303;       
+            --header-text: #7d8575;
+            --highlight-bg: rgba(196, 42, 20, 0.08);
         }
 
         [data-theme="light"] {
-            /* --- THEME CLAIR RADICAL (Papier / Jour) --- */
-            --bg-color: #d9ceb2;        /* Papier beige / Parchemin militaire usé */
-            --panel-bg: #e6dfcc;        /* Papier légèrement plus clair */
-            --text-color: #2b251a;      /* Encre brune / noire usée */
+            /* --- THEME CLAIR RADICAL (Carte d'état-major de jour) --- */
+            --bg-color: #d9ceb2;        /* Vieux papier de carte */
+            --panel-bg: #e6dfcc;        
+            --text-color: #2b251a;      /* Encre brune */
             --text-muted: #5c5343;      
-            --accent-color: #8c2d19;    /* Rouge brique / Tampon officiel */
+            --accent-color: #8c2d19;    /* Rouge tampon officiel */
             --accent-hover: #b03a24;    
-            --border-color: #4a4031;    /* Bordures encre brune épaisse */
+            --border-color: #4a4031;    
             --input-bg: #f0ebd8;        
             --header-bg: #2d261d;       
             --header-text: #d9ceb2;
@@ -45,7 +45,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            transition: background-color 0.15s, color 0.15s;
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -123,16 +123,6 @@
             position: relative;
         }
 
-        .panel::before {
-            content: "✦";
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 0.8rem;
-            color: var(--border-color);
-            opacity: 0.6;
-        }
-
         .panel-title {
             font-size: 1.1rem;
             font-weight: 700;
@@ -207,7 +197,6 @@
             border: 2px dashed var(--accent-color);
             padding: 2px 12px;
             background-color: var(--highlight-bg);
-            transform: rotate(-0.5deg);
         }
 
         .notice-section {
@@ -254,19 +243,18 @@
             
             <div class="form-group">
                 <label for="input-distance" id="lbl-distance">Distance à la cible (km)</label>
-                <input type="number" id="input-distance" step="0.01" min="0.1" max="30.0" placeholder="Ex: 12.34" oninput="calculate()">
+                <input type="number" id="input-distance" step="0.01" min="0.1" max="30.0" placeholder="Ex: 5.33" oninput="calculate()">
             </div>
 
             <div class="form-group">
                 <label for="input-azimut" id="lbl-azimut">Azimut cible (°)</label>
-                <input type="number" id="input-azimut" step="0.1" min="0" max="360" placeholder="Ex: 35.0" oninput="calculate()">
+                <input type="number" id="input-azimut" step="0.1" min="0" max="360" placeholder="Ex: 70.3" oninput="calculate()">
             </div>
 
             <div class="form-group">
                 <label for="input-shell" id="lbl-shell">Type d'obus</label>
                 <select id="input-shell" onchange="calculate()">
-                    <option value="AP" selected>AP (Armor Piercing)</option>
-                    <option value="HE">HE / Autre</option>
+                    <option value="STANDARD" selected>Standard / HE / AP</option>
                 </select>
             </div>
         </div>
@@ -290,7 +278,7 @@
             </div>
 
             <div class="result-item">
-                <span class="result-label" id="res-range-lbl">Palier de Distance Table</span>
+                <span class="result-label" id="res-range-lbl">Palier de Base Table</span>
                 <span class="result-value" id="res-range">-</span>
             </div>
         </div>
@@ -303,12 +291,13 @@
     </div>
 
     <script>
+        // Table balistique avec les bases et coefficients d'interpolation par palier (Charges)
         const balisticTable = {
-            1: { coef: 0.12, steps: { 0.1: 1.20, 0.5: 6.00, 1.0: 12.00, 2.0: 24.00, 3.0: 36.00, 4.0: 48.00, 5.0: 60.00 } },
+            1: { coef: 0.12, steps: { 0.1: 1.20, 1.0: 12.00, 2.0: 24.00, 3.0: 36.00, 4.0: 48.00, 5.0: 60.00 } },
             2: { coef: 0.06, steps: { 5.1: 30.60, 6.0: 36.00, 7.0: 42.00, 8.0: 48.00, 9.0: 54.00, 10.0: 60.00 } },
             3: { coef: 0.04, steps: { 10.1: 40.40, 11.0: 44.00, 12.0: 48.00, 13.0: 52.00, 14.0: 56.00, 15.0: 60.00 } },
             4: { coef: 0.03, steps: { 15.1: 45.30, 16.0: 48.00, 17.0: 51.00, 18.0: 54.00, 19.0: 57.00, 20.0: 60.00 } },
-            5: { coef: 0.02, steps: { 20.1: 48.24, 21.0: 52.00, 22.0: 52.80, 23.0: 55.20, 24.0: 57.60, 25.0: 60.00 } },
+            5: { coef: 0.02, steps: { 20.1: 48.24, 21.0: 50.40, 22.0: 52.80, 23.0: 55.20, 24.0: 57.60, 25.0: 60.00 } },
             6: { coef: 0.02, steps: { 25.1: 50.20, 26.0: 52.00, 27.0: 54.00, 28.0: 56.00, 29.0: 58.00, 30.0: 60.00 } }
         };
 
@@ -317,14 +306,13 @@
                 title: "Iron Nest - Calculateur Balistique", inputs: "Données de Saisie",
                 distance: "Distance à la cible (km)", azimut: "Azimut cible (°)", shell: "Type d'obus",
                 results: "Paramètres de Tir Requis", charges: "Charges Propulsives (P.C.)",
-                elevation: "Élévation du Canon", azimut_res: "Azimut Final (Tourelle)", range_res: "Palier de Distance Table",
+                elevation: "Élévation du Canon", azimut_res: "Azimut Final (Tourelle)", range_res: "Palier de Base Table",
                 notice_title: "Comment utiliser le calculateur",
                 steps: [
                     "Relevez la distance et l'azimut de votre cible sur la carte tactique.",
                     "Saisissez ces valeurs dans la partie gauche du calculateur.",
-                    "Sélectionnez le type d'obus.",
-                    "Configurez votre pupitre de tir avec les résultats affichés.",
-                    "Faites feu !"
+                    "Vérifiez les valeurs de tir calculées à droite (Interpolation linéaire dynamique).",
+                    "Ajustez vos équipements en jeu et ouvrez le feu !"
                 ]
             },
             en: {
@@ -336,9 +324,8 @@
                 steps: [
                     "Measure target's bearing and range on the tactical map.",
                     "Enter these values into the left side of the calculator.",
-                    "Select your shell type.",
-                    "Adjust your turret/station with the calculated results.",
-                    "Fire!"
+                    "Review the calculated firing data on the right (Dynamic linear interpolation).",
+                    "Set your in-game station and fire!"
                 ]
             }
         };
@@ -348,33 +335,33 @@
         function calculate() {
             const distance = parseFloat(document.getElementById('input-distance').value);
             const azimut = parseFloat(document.getElementById('input-azimut').value);
-            const shellType = document.getElementById('input-shell').value;
 
             if (isNaN(distance) || distance < 0.1 || distance > 30.0) {
                 resetResults();
                 return;
             }
 
+            // 1. Détermination de la Charge Propulsive (P.C.)
             const pc = Math.ceil(distance / 5);
-            const baseRange = Math.floor(distance * 10) / 10;
             const palierData = balisticTable[pc];
             if (!palierData) return;
 
-            // Approximation simple si le palier exact n'est pas codé en dur
-            const keys = Object.keys(palierData.steps).map(Number);
-            const closestKey = keys.reduce((prev, curr) => Math.abs(curr - distance) < Math.abs(prev - distance) ? curr : prev);
-            const baseElevation = palierData.steps[closestKey];
-            let finalElevation = baseElevation;
+            // 2. Trouver la borne inférieure exacte disponible dans la table pour ce palier
+            const keys = Object.keys(palierData.steps).map(Number).sort((a, b) => b - a);
+            const baseKey = keys.find(k => k <= distance) || keys[keys.length - 1];
+            
+            const baseElevation = palierData.steps[baseKey];
 
-            if (shellType === "AP") {
-                const diff = distance - closestKey;
-                finalElevation = baseElevation + (palierData.coef * (diff / 0.01));
-            }
+            // 3. Application de l'interpolation linéaire systématique (tous les 10 mètres / 0.01 km)
+            const distanceDelta = distance - baseKey;
+            const stepsOfTenMeters = distanceDelta / 0.01;
+            const finalElevation = baseElevation + (palierData.coef * stepsOfTenMeters);
 
+            // 4. Affichage des résultats
             document.getElementById('res-charges').innerText = `P.C. ${pc}`;
             document.getElementById('res-elevation').innerText = isNaN(finalElevation) ? "-" : `${finalElevation.toFixed(2)}°`;
             document.getElementById('res-azimut').innerText = isNaN(azimut) ? "-" : `${azimut.toFixed(1)}°`;
-            document.getElementById('res-range').innerText = `${closestKey.toFixed(1)} km`;
+            document.getElementById('res-range').innerText = `${baseKey.toFixed(1)} km`;
         }
 
         function resetResults() {
