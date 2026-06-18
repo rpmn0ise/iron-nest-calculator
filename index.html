@@ -73,9 +73,10 @@
         .controls {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
-        button {
+        button, select.select-lang {
             background-color: var(--panel-bg);
             color: var(--text-color);
             border: 2px solid var(--border-color);
@@ -84,6 +85,7 @@
             font-weight: 700;
             text-transform: uppercase;
             transition: all 0.2s;
+            border-radius: 0;
         }
 
         button:hover {
@@ -92,13 +94,13 @@
             border-color: var(--accent-color);
         }
 
-        header button {
+        header button, header select.select-lang {
             background-color: transparent;
             color: var(--header-text);
             border-color: var(--header-text);
         }
 
-        header button:hover {
+        header button:hover, header select.select-lang:hover {
             background-color: var(--header-text);
             color: var(--header-bg);
         }
@@ -232,7 +234,13 @@
     <header>
         <h1 id="app-title">Iron Nest - Calculateur Balistique</h1>
         <div class="controls">
-            <button id="btn-lang" onclick="toggleLanguage()">EN</button>
+            <select class="select-lang" id="select-lang" onchange="changeLanguage(this.value)">
+                <option value="fr" selected>FR</option>
+                <option value="en">EN</option>
+                <option value="de">DE</option>
+                <option value="ru">RU</option>
+                <option value="zh">ZH</option>
+            </select>
             <button id="btn-theme" onclick="toggleTheme()">☀️ / 🌙</button>
         </div>
     </header>
@@ -281,6 +289,16 @@
                 <span class="result-label" id="res-range-lbl">Palier de Base Table</span>
                 <span class="result-value" id="res-range">-</span>
             </div>
+
+            <div class="result-item" style="border-top: 2px solid var(--border-color); margin-top: 10px; padding-top: 15px;">
+                <span class="result-label" id="res-time-lbl">Temps estimé avant l'impact</span>
+                <span class="result-value" id="res-time">-</span>
+            </div>
+
+            <div class="result-item">
+                <span class="result-label" id="res-dispersion-lbl">Rayon d'Erreur (Dispersion)</span>
+                <span class="result-value" id="res-dispersion" style="color: var(--accent-hover); font-weight: bold;">-</span>
+            </div>
         </div>
     </div>
 
@@ -291,7 +309,7 @@
     </div>
 
     <script>
-        // Table balistique avec les bases et coefficients d'interpolation par palier (Charges)
+        // Table balistique
         const balisticTable = {
             1: { coef: 0.12, steps: { 0.1: 1.20, 1.0: 12.00, 2.0: 24.00, 3.0: 36.00, 4.0: 48.00, 5.0: 60.00 } },
             2: { coef: 0.06, steps: { 5.1: 30.60, 6.0: 36.00, 7.0: 42.00, 8.0: 48.00, 9.0: 54.00, 10.0: 60.00 } },
@@ -307,11 +325,12 @@
                 distance: "Distance à la cible (km)", azimut: "Azimut cible (°)", shell: "Type d'obus",
                 results: "Paramètres de Tir Requis", charges: "Charges Propulsives (P.C.)",
                 elevation: "Élévation du Canon", azimut_res: "Azimut Final (Tourelle)", range_res: "Palier de Base Table",
+                time_lbl: "Temps estimé avant l'impact", dispersion_lbl: "Rayon d'Erreur (Dispersion)",
                 notice_title: "Comment utiliser le calculateur",
                 steps: [
                     "Relevez la distance et l'azimut de votre cible sur la carte tactique.",
-                    "Saisissez ces valeurs dans la partie gauche du calculateur.",
-                    "Vérifiez les valeurs de tir calculées à droite (Interpolation linéaire dynamique).",
+                    "Saisissez ces valeurs dans la partie gauche du calculateur (ou utilisez [/] et [*] sur le pavé numérique).",
+                    "Vérifiez l'élévation, le temps de vol de l'obus ainsi que la dispersion théorique à droite.",
                     "Ajustez vos équipements en jeu et ouvrez le feu !"
                 ]
             },
@@ -320,12 +339,55 @@
                 distance: "Target Distance (km)", azimut: "Target Bearing (°)", shell: "Shell Type",
                 results: "Required Firing Data", charges: "Powder Charges (P.C.)",
                 elevation: "Gun Elevation", azimut_res: "Final Bearing (Turret)", range_res: "Table Base Range",
+                time_lbl: "Estimated Impact Time", dispersion_lbl: "Error Radius (Dispersion)",
                 notice_title: "How to use the calculator",
                 steps: [
                     "Measure target's bearing and range on the tactical map.",
-                    "Enter these values into the left side of the calculator.",
-                    "Review the calculated firing data on the right (Dynamic linear interpolation).",
+                    "Enter these values on the left side (or use [/] and [*] on your Numpad).",
+                    "Review target elevation, shell travel time and expected dispersion radius on the right.",
                     "Set your in-game station and fire!"
+                ]
+            },
+            de: {
+                title: "Iron Nest - Ballistischer Rechner", inputs: "Eingabedaten",
+                distance: "Zielentfernung (km)", azimut: "Zielrichtung (°)", shell: "Granatentyp",
+                results: "Erforderliche Schussdaten", charges: "Treibladungen (P.C.)",
+                elevation: "Geschützerhöhung", azimut_res: "Endgültige Richtung (Turm)", range_res: "Tabellen-Basisreichweite",
+                time_lbl: "Geschätzte Zeit bis zum Aufprall", dispersion_lbl: "Fehlerradius (Streuung)",
+                notice_title: "Bedienungsanleitung des Rechners",
+                steps: [
+                    "Messen Sie Richtung und Entfernung des Ziels auf der taktischen Karte.",
+                    "Geben Sie diese Werte auf der linken Seite ein (oder nutzen Sie [/] und [*] auf dem Nummernblock).",
+                    "Überprüfen Sie die Geschützerhöhung, Flugzeit der Granate sowie den theoretischen Streuradius rechts.",
+                    "Stellen Sie Ihre Station im Spiel ein und feuern Sie!"
+                ]
+            },
+            ru: {
+                title: "Iron Nest - Баллистический Калькулятор", inputs: "Входные Данные",
+                distance: "Дистанция до цели (км)", azimut: "Азимут цели (°)", shell: "Тип снаряда",
+                results: "Необходимые Параметры Стрельбы", charges: "Пороховые Заряды (P.C.)",
+                elevation: "Угол Наклона Орудия", azimut_res: "Итоговый Азимут (Башня)", range_res: "Базовый Уровень Таблицы",
+                time_lbl: "Расчетное время до удара", dispersion_lbl: "Радиус Погрешности (Разброс)",
+                notice_title: "Как использовать калькулятор",
+                steps: [
+                    "Определите азимут и расстояние до вашей цели на тактической карте.",
+                    "Введите эти значения в левой части калькулятора (или используйте [/] и [*] на цифровой клавиатуре).",
+                    "Проверьте угол наклона орудия, время полета снаряда и теоретический разброс справа.",
+                    "Настройте ваше орудие в игре и открывайте огонь!"
+                ]
+            },
+            zh: {
+                title: "Iron Nest - 弹道 Моделирование 计算器", inputs: "输入数据",
+                distance: "目标距离 (公里)", azimut: "目标方位角 (°)", shell: "炮弹类型",
+                results: "所需射击 strike 参数", charges: "推进药包 (P.C.)",
+                elevation: "火炮仰角", azimut_res: "最终方位角 (炮塔)", range_res: "表基准范围",
+                time_lbl: "预计命中时间", dispersion_lbl: "误差半径 (散布)",
+                notice_title: "如何使用计算器",
+                steps: [
+                    "在战术地图上测量目标的方位角和距离。",
+                    "在计算器左侧输入这些数值（或使用小键盘上的 [/] 和 [*]）。",
+                    "确认右侧显示的火炮仰角、炮弹飞行时间以及理论散布半径。",
+                    "调整您的游戏内炮位并开火！"
                 ]
             }
         };
@@ -341,27 +403,27 @@
                 return;
             }
 
-            // 1. Détermination de la Charge Propulsive (P.C.)
             const pc = Math.ceil(distance / 5);
             const palierData = balisticTable[pc];
             if (!palierData) return;
 
-            // 2. Trouver la borne inférieure exacte disponible dans la table pour ce palier
             const keys = Object.keys(palierData.steps).map(Number).sort((a, b) => b - a);
             const baseKey = keys.find(k => k <= distance) || keys[keys.length - 1];
-            
             const baseElevation = palierData.steps[baseKey];
 
-            // 3. Application de l'interpolation linéaire systématique (tous les 10 mètres / 0.01 km)
             const distanceDelta = distance - baseKey;
             const stepsOfTenMeters = distanceDelta / 0.01;
             const finalElevation = baseElevation + (palierData.coef * stepsOfTenMeters);
 
-            // 4. Affichage des résultats
+            const theoreticalDispersion = 12 + (distance * 4.5);
+            const estimatedFlightTime = 4.0 + (distance * 1.85) + (pc * 0.5);
+
             document.getElementById('res-charges').innerText = `P.C. ${pc}`;
             document.getElementById('res-elevation').innerText = isNaN(finalElevation) ? "-" : `${finalElevation.toFixed(2)}°`;
             document.getElementById('res-azimut').innerText = isNaN(azimut) ? "-" : `${azimut.toFixed(1)}°`;
             document.getElementById('res-range').innerText = `${baseKey.toFixed(1)} km`;
+            document.getElementById('res-time').innerText = `${estimatedFlightTime.toFixed(1)}s`;
+            document.getElementById('res-dispersion').innerText = `± ${theoreticalDispersion.toFixed(1)} m`;
         }
 
         function resetResults() {
@@ -369,11 +431,39 @@
             document.getElementById('res-elevation').innerText = "-";
             document.getElementById('res-azimut').innerText = "-";
             document.getElementById('res-range').innerText = "-";
+            document.getElementById('res-time').innerText = "-";
+            document.getElementById('res-dispersion').innerText = "-";
         }
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'fr' ? 'en' : 'fr';
-            document.getElementById('btn-lang').innerText = currentLang === 'fr' ? 'EN' : 'FR';
+        /* --- GESTIONNAIRE DES RACCOURCIS NUMPAD --- */
+        function setupNumpadShortcuts() {
+            window.addEventListener('keydown', (event) => {
+                if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
+
+                switch (event.key) {
+                    case '/':
+                        event.preventDefault();
+                        const distInput = document.getElementById('input-distance');
+                        distInput.focus();
+                        distInput.select();
+                        break;
+                    case '*':
+                        event.preventDefault();
+                        const aziInput = document.getElementById('input-azimut');
+                        aziInput.focus();
+                        aziInput.select();
+                        break;
+                    case '-':
+                        event.preventDefault();
+                        toggleTheme();
+                        break;
+                }
+            });
+        }
+
+        function changeLanguage(langCode) {
+            currentLang = langCode;
+            localStorage.setItem('lang', langCode);
             updateUIStrings();
         }
 
@@ -389,6 +479,8 @@
             document.getElementById('res-elevation-lbl').innerText = data.elevation;
             document.getElementById('res-azimut-lbl').innerText = data.azimut_res;
             document.getElementById('res-range-lbl').innerText = data.range_res;
+            document.getElementById('res-time-lbl').innerText = data.time_lbl;
+            document.getElementById('res-dispersion-lbl').innerText = data.dispersion_lbl;
             document.getElementById('notice-title').innerText = data.notice_title;
 
             const stepsOl = document.getElementById('notice-steps');
@@ -398,6 +490,9 @@
                 li.innerText = step;
                 stepsOl.appendChild(li);
             });
+            
+            // Forcer le recalcul visuel pour mettre à jour les unités/textes si des données sont présentes
+            calculate();
         }
 
         function toggleTheme() {
@@ -410,7 +505,13 @@
         window.onload = () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            const savedLang = localStorage.getItem('lang') || 'fr';
+            document.getElementById('select-lang').value = savedLang;
+            currentLang = savedLang;
+
             updateUIStrings();
+            setupNumpadShortcuts();
         };
     </script>
 </body>
