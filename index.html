@@ -131,9 +131,12 @@
             flex: 1;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 992px) {
             .main-container {
                 grid-template-columns: 1fr 1fr;
+            }
+            .full-width-panel {
+                grid-column: span 2;
             }
         }
 
@@ -143,6 +146,8 @@
             padding: 25px;
             position: relative;
             box-shadow: 0 6px 18px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
         }
 
         .panel-title {
@@ -195,6 +200,13 @@
             box-shadow: 0 0 0 3px var(--highlight-bg);
         }
 
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            margin-top: auto;
+        }
+
         .result-item {
             display: flex;
             justify-content: space-between;
@@ -228,6 +240,80 @@
             border: 2px dashed var(--accent-color);
             padding: 2px 12px;
             background-color: var(--highlight-bg);
+        }
+
+        /* --- LISTE DES POSITIONS --- */
+        .locations-list {
+            list-style: none;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+        }
+
+        .location-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .location-item:last-child {
+            border-bottom: none;
+        }
+
+        .location-info {
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .location-info:hover {
+            color: var(--accent-color);
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .btn-edit-loc, .btn-delete-loc {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 2px 8px;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit-loc:hover {
+            background-color: var(--border-color);
+            color: #ffffff;
+        }
+
+        .btn-delete-loc {
+            color: var(--accent-color);
+        }
+
+        .btn-delete-loc:hover {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border-color: var(--accent-color);
+        }
+
+        .empty-log {
+            padding: 15px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
         }
 
         .notice-section {
@@ -317,6 +403,13 @@
                     <option value="STANDARD" selected>Standard / HE / AP</option>
                 </select>
             </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="input-loc-name" id="lbl-loc-name">Nom de la position (Optionnel)</label>
+                <input type="text" id="input-loc-name" placeholder="Ex: Bunker Alpha">
+            </div>
+
+            <button class="btn-action" id="btn-save-loc" onclick="saveCurrentLocation()">Enregistrer la Position</button>
         </div>
 
         <div class="panel">
@@ -352,6 +445,12 @@
                 <span class="result-value" id="res-dispersion" style="color: var(--accent-hover); font-weight: bold;">-</span>
             </div>
         </div>
+
+        <div class="panel full-width-panel" style="margin-top: 5px;">
+            <div class="panel-title" id="title-saved-locations">Positions Enregistrées</div>
+            <ul class="locations-list" id="locations-list-container">
+            </ul>
+        </div>
     </div>
 
     <div class="notice-section">
@@ -362,7 +461,7 @@
 
     <footer class="site-footer">
         <a href="https://github.com/rpmn0ise/iron-nest-calculator" target="_blank" rel="noopener noreferrer" id="credit-link">Créé par rpmn0ise</a>
-    </footer>
+    </footer >
 
     <script>
         // Table balistique
@@ -379,14 +478,19 @@
             fr: {
                 title: "Iron Nest - Calculateur Balistique", inputs: "Données de Saisie",
                 distance: "Distance à la cible (km)", azimut: "Azimut cible (°)", shell: "Type d'obus",
+                lbl_loc_name: "Nom de la position (Optionnel)", placeholder_loc_name: "Ex: Bunker Alpha",
+                prompt_rename: "Entrez le nouveau nom de la position :",
                 results: "Paramètres de Tir Requis", charges: "Charges Propulsives (P.C.)",
                 elevation: "Élévation du Canon", azimut_res: "Azimut Final (Tourelle)", range_res: "Palier de Base Table",
                 time_lbl: "Temps estimé avant l'impact", dispersion_lbl: "Rayon d'Erreur (Dispersion)",
+                saved_locations: "Positions Enregistrées", save_btn: "Enregistrer la Position", empty_log: "Aucune position enregistrée.",
                 notice_title: "Comment utiliser le calculateur",
                 steps: [
                     "Relevez la distance et l'azimut de votre cible sur la carte tactique.",
                     "Saisissez ces valeurs dans la partie gauche du calculateur (ou utilisez [/] et [*] sur le pavé numérique).",
+                    "Donnez éventuellement un nom à votre position pour mieux vous repérer.",
                     "Vérifiez l'élévation, le temps de vol de l'obus ainsi que la dispersion théorique à droite.",
+                    "Cliquez sur 'Enregistrer la Position' pour mettre de côté vos cibles importantes.",
                     "Ajustez vos équipements en jeu et ouvrez le feu !"
                 ],
                 credit_text: "Créé par rpmn0ise"
@@ -394,14 +498,19 @@
             en: {
                 title: "Iron Nest - Ballistic Calculator", inputs: "Input Data",
                 distance: "Target Distance (km)", azimut: "Target Bearing (°)", shell: "Shell Type",
+                lbl_loc_name: "Location Name (Optional)", placeholder_loc_name: "Ex: Bunker Alpha",
+                prompt_rename: "Enter the new location name:",
                 results: "Required Firing Data", charges: "Powder Charges (P.C.)",
                 elevation: "Gun Elevation", azimut_res: "Final Bearing (Turret)", range_res: "Table Base Range",
                 time_lbl: "Estimated Impact Time", dispersion_lbl: "Error Radius (Dispersion)",
+                saved_locations: "Saved Locations", save_btn: "Save Location", empty_log: "No saved locations.",
                 notice_title: "How to use the calculator",
                 steps: [
                     "Measure target's bearing and range on the tactical map.",
                     "Enter these values on the left side (or use [/] and [*] on your Numpad).",
+                    "Optionally name your location to stay organized.",
                     "Review target elevation, shell travel time and expected dispersion radius on the right.",
+                    "Click 'Save Location' to keep track of critical enemy positions.",
                     "Set your in-game station and fire!"
                 ],
                 credit_text: "Created by rpmn0ise"
@@ -409,14 +518,19 @@
             de: {
                 title: "Iron Nest - Ballistischer Rechner", inputs: "Eingabedaten",
                 distance: "Zielentfernung (km)", azimut: "Zielrichtung (°)", shell: "Granatentyp",
+                lbl_loc_name: "Positionsname (Optional)", placeholder_loc_name: "Z.B. Bunker Alpha",
+                prompt_rename: "Geben Sie den neuen Namen der Position ein:",
                 results: "Erforderliche Schussdaten", charges: "Treibladungen (P.C.)",
                 elevation: "Geschützerhöhung", azimut_res: "Endgültige Richtung (Turm)", range_res: "Tabellen-Basisreichweite",
                 time_lbl: "Geschätzte Zeit bis zum Aufprall", dispersion_lbl: "Fehlerradius (Streuung)",
+                saved_locations: "Gespeicherte Positionen", save_btn: "Position Speichern", empty_log: "Keine Positionen gespeichert.",
                 notice_title: "Bedienungsanleitung des Rechners",
                 steps: [
                     "Messen Sie Richtung und Entfernung des Ziels auf der taktischen Karte.",
                     "Geben Sie diese Werte auf der linken Seite ein (oder nutzen Sie [/] und [*] auf dem Nummernblock).",
+                    "Geben Sie der Position optional einen Namen zur besseren Orientierung.",
                     "Überprüfen Sie die Geschützerhöhung, Flugzeit der Granate sowie den theoretischen Streuradius rechts.",
+                    "Klicken Sie auf 'Position Speichern', um wichtige Ziele für später zu sichern.",
                     "Stellen Sie Ihre Station im Spiel ein und feuern Sie!"
                 ],
                 credit_text: "Erstellt von rpmn0ise"
@@ -424,29 +538,39 @@
             ru: {
                 title: "Iron Nest - Баллистический Калькулятор", inputs: "Входные Данные",
                 distance: "Дистанция до цели (км)", azimut: "Азимут цели (°)", shell: "Тип снаряда",
+                lbl_loc_name: "Название позиции (Опционально)", placeholder_loc_name: "Пример: Бункер Альфа",
+                prompt_rename: "Введите новое название позиции:",
                 results: "Необходимые Параметры Стрельбы", charges: "Пороховые Заряды (P.C.)",
                 elevation: "Угол Наклона Орудия", azimut_res: "Итоговый Азимут (Башня)", range_res: "Базовый Уровень Таблицы",
                 time_lbl: "Расчетное время до удара", dispersion_lbl: "Радиус Погрешности (Разброс)",
+                saved_locations: "Сохраненные Позиции", save_btn: "Сохранить Позицию", empty_log: "Нет сохраненных позиций.",
                 notice_title: "Как использовать калькулятор",
                 steps: [
                     "Определите азимут и расстояние до вашей цели на тактической карте.",
                     "Введите эти значения в левой части калькулятора (или используйте [/] и [*] на цифровой клавиатуре).",
+                    "При желании укажите имя позиции для удобства.",
                     "Проверьте угол наклона орудия, время полета снаряда и теоретический разброс справа.",
+                    "Нажмите 'Сохранить Позицию', чтобы сохранить важные ориентиры.",
                     "Настройте ваше орудие в игре и открывайте огонь!"
                 ],
                 credit_text: "Создано rpmn0ise"
             },
             zh: {
-                title: "Iron Nest - 弹道 Моделирование 计算器", inputs: "输入数据",
+                title: "Iron Nest - 弹道计算器", inputs: "输入数据",
                 distance: "目标距离 (公里)", azimut: "目标方位角 (°)", shell: "炮弹类型",
-                results: "所需射击 strike 参数", charges: "推进药包 (P.C.)",
+                lbl_loc_name: "位置名称 (可选)", placeholder_loc_name: "例如：阿尔法地堡",
+                prompt_rename: "输入新的位置名称：",
+                results: "所需射击参数", charges: "推进药包 (P.C.)",
                 elevation: "火炮仰角", azimut_res: "最终方位角 (炮塔)", range_res: "表基准范围",
                 time_lbl: "预计命中时间", dispersion_lbl: "误差半径 (散布)",
+                saved_locations: "已保存的位置", save_btn: "保存当前位置", empty_log: "暂无保存的位置。",
                 notice_title: "如何使用计算器",
                 steps: [
-                    "在战术地图上测量目标的方位角和距离。",
-                    "在计算器左侧输入这些数值（或使用小键盘上的 [/] 和 [*]）。",
+                    "在战术地图上测量目标的方位角 and 距离。",
+                    "在计算器左侧输入 these 数值（或使用小键盘上的 [/] 和 [*]）。",
+                    "可以选择为您的位置命名以便于识别。",
                     "确认右侧显示的火炮仰角、炮弹飞行时间以及理论散布半径。",
+                    "点击“保存当前位置”以记录重要的敌方坐标。",
                     "调整您的游戏内炮位并开火！"
                 ],
                 credit_text: "由 rpmn0ise 创建"
@@ -454,6 +578,7 @@
         };
 
         let currentLang = 'fr';
+        let savedLocations = [];
 
         function calculate() {
             const distance = parseFloat(document.getElementById('input-distance').value);
@@ -496,6 +621,82 @@
             document.getElementById('res-dispersion').innerText = "-";
         }
 
+        /* --- LOGIQUE DE SAUVEGARDE DES POSITIONS --- */
+        function saveCurrentLocation() {
+            const dist = parseFloat(document.getElementById('input-distance').value);
+            const azi = parseFloat(document.getElementById('input-azimut').value);
+            const nameInput = document.getElementById('input-loc-name');
+            let name = nameInput.value.trim();
+
+            if (isNaN(dist) || isNaN(azi)) return;
+
+            const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            // Si aucun nom n'est fourni, on met une valeur par défaut
+            if (!name) {
+                name = `TGT #${savedLocations.length + 1}`;
+            }
+
+            const newLocation = { id: Date.now(), name, dist, azi, time: timestamp };
+
+            savedLocations.push(newLocation);
+            localStorage.setItem('saved_locations', JSON.stringify(savedLocations));
+            
+            nameInput.value = ""; // Réinitialise le champ nom
+            renderLocations();
+        }
+
+        function loadLocation(dist, azi) {
+            document.getElementById('input-distance').value = dist;
+            document.getElementById('input-azimut').value = azi;
+            calculate();
+        }
+
+        function renameLocation(id, event) {
+            event.stopPropagation();
+            const loc = savedLocations.find(l => l.id === id);
+            if (!loc) return;
+
+            const newName = prompt(i18n[currentLang].prompt_rename, loc.name);
+            if (newName !== null && newName.trim() !== "") {
+                loc.name = newName.trim();
+                localStorage.setItem('saved_locations', JSON.stringify(savedLocations));
+                renderLocations();
+            }
+        }
+
+        function deleteLocation(id, event) {
+            event.stopPropagation();
+            savedLocations = savedLocations.filter(loc => loc.id !== id);
+            localStorage.setItem('saved_locations', JSON.stringify(savedLocations));
+            renderLocations();
+        }
+
+        function renderLocations() {
+            const container = document.getElementById('locations-list-container');
+            container.innerHTML = "";
+
+            if (savedLocations.length === 0) {
+                container.innerHTML = `<div class="empty-log">${i18n[currentLang].empty_log}</div>`;
+                return;
+            }
+
+            savedLocations.forEach((loc) => {
+                const li = document.createElement('li');
+                li.className = "location-item";
+                li.innerHTML = `
+                    <div class="location-info" onclick="loadLocation(${loc.dist}, ${loc.azi})" title="[${loc.time}] ${loc.name}">
+                        [${loc.time}] 🛰️ <strong>${loc.name}</strong> | DIST: ${loc.dist.toFixed(2)} km | AZI: ${loc.azi.toFixed(1)}°
+                    </div>
+                    <div class="location-actions">
+                        <button class="btn-edit-loc" onclick="renameLocation(${loc.id}, event)">✏️</button>
+                        <button class="btn-delete-loc" onclick="deleteLocation(${loc.id}, event)">X</button>
+                    </div>
+                `;
+                container.appendChild(li);
+            });
+        }
+
         /* --- GESTIONNAIRE DES RACCOURCIS NUMPAD --- */
         function setupNumpadShortcuts() {
             window.addEventListener('keydown', (event) => {
@@ -526,6 +727,7 @@
             currentLang = langCode;
             localStorage.setItem('lang', langCode);
             updateUIStrings();
+            renderLocations();
         }
 
         function updateUIStrings() {
@@ -535,6 +737,8 @@
             document.getElementById('lbl-distance').innerText = data.distance;
             document.getElementById('lbl-azimut').innerText = data.azimut;
             document.getElementById('lbl-shell').innerText = data.shell;
+            document.getElementById('lbl-loc-name').innerText = data.lbl_loc_name;
+            document.getElementById('input-loc-name').placeholder = data.placeholder_loc_name;
             document.getElementById('title-results').innerText = data.results;
             document.getElementById('res-charges-lbl').innerText = data.charges;
             document.getElementById('res-elevation-lbl').innerText = data.elevation;
@@ -544,6 +748,8 @@
             document.getElementById('res-dispersion-lbl').innerText = data.dispersion_lbl;
             document.getElementById('notice-title').innerText = data.notice_title;
             document.getElementById('credit-link').innerText = data.credit_text;
+            document.getElementById('title-saved-locations').innerText = data.saved_locations;
+            document.getElementById('btn-save-loc').innerText = data.save_btn;
 
             const stepsOl = document.getElementById('notice-steps');
             stepsOl.innerHTML = "";
@@ -553,7 +759,6 @@
                 stepsOl.appendChild(li);
             });
             
-            // Forcer le recalcul visuel pour mettre à jour les unités/textes si des données sont présentes
             calculate();
         }
 
@@ -572,7 +777,14 @@
             document.getElementById('select-lang').value = savedLang;
             currentLang = savedLang;
 
+            // Charger les positions depuis le LocalStorage
+            const storedLocs = localStorage.getItem('saved_locations');
+            if (storedLocs) {
+                savedLocations = JSON.parse(storedLocs);
+            }
+
             updateUIStrings();
+            renderLocations();
             setupNumpadShortcuts();
         };
     </script>
