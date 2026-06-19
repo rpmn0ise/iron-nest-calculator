@@ -7,17 +7,18 @@
     <style>
         :root {
             /* --- THEME SOMBRE RADICAL (Bunker de nuit) --- */
-            --bg-color: #050505;        /* Presque noir pur */
-            --panel-bg: #0c0b0a;        /* Gris-brun extrêmement sombre */
-            --text-color: #9fa695;      /* Vert-gris militaire nocturne */
-            --text-muted: #4e5447;      /* Texte secondaire très effacé */
-            --accent-color: #c42a14;    /* Rouge alerte sombre */
-            --accent-hover: #fa3c20;    
-            --border-color: #1a1816;    /* Bordures très sombres */
-            --input-bg: #070606;        
-            --header-bg: #030303;       
-            --header-text: #7d8575;
-            --highlight-bg: rgba(196, 42, 20, 0.08);
+            --bg-color: #0a0a09;        /* Presque noir pur */
+            --panel-bg: #131210;        /* Gris-brun sombre, lisible */
+            --text-color: #d8ddd0;      /* Vert-gris militaire clair, contraste élevé */
+            --text-muted: #8a9180;      /* Texte secondaire toujours lisible */
+            --accent-color: #e8421f;    /* Rouge alerte vif */
+            --accent-hover: #ff5a32;
+            --border-color: #3a3833;    /* Bordures visibles */
+            --input-bg: #0e0d0b;
+            --header-bg: #060605;
+            --header-text: #c7cdbc;
+            --highlight-bg: rgba(232, 66, 31, 0.12);
+            --shadow-color: rgba(0, 0, 0, 0.6);
         }
 
         [data-theme="light"] {
@@ -33,6 +34,7 @@
             --header-bg: #2d261d;       
             --header-text: #d9ceb2;
             --highlight-bg: rgba(140, 45, 25, 0.05);
+            --shadow-color: rgba(43, 37, 26, 0.18);
         }
 
         * {
@@ -42,11 +44,18 @@
             font-family: 'Courier New', Courier, Georgia, serif;
         }
 
+        html {
+            background-color: var(--bg-color);
+        }
+
         body {
             background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 15% 0%, var(--highlight-bg) 0%, transparent 45%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
             color: var(--text-color);
-            transition: background-color 0.15s, color 0.15s;
-            padding: 20px;
+            transition: background-color 0.2s, color 0.2s;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -56,18 +65,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            padding: 18px 24px;
             background-color: var(--header-bg);
             color: var(--header-text);
             border: 3px double var(--border-color);
             margin-bottom: 25px;
+            box-shadow: 0 4px 14px var(--shadow-color);
         }
 
         h1 {
             font-size: 1.3rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 12px var(--highlight-bg);
         }
 
         .controls {
@@ -80,18 +91,25 @@
             background-color: var(--panel-bg);
             color: var(--text-color);
             border: 2px solid var(--border-color);
-            padding: 6px 12px;
+            padding: 7px 14px;
             cursor: pointer;
             font-weight: 700;
             text-transform: uppercase;
-            transition: all 0.2s;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: all 0.18s ease;
             border-radius: 0;
         }
 
-        button:hover {
+        button:hover, select.select-lang:hover {
             background-color: var(--accent-color);
             color: #ffffff;
             border-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--highlight-bg);
+        }
+
+        button:active {
+            transform: translateY(1px);
         }
 
         header button, header select.select-lang {
@@ -103,6 +121,7 @@
         header button:hover, header select.select-lang:hover {
             background-color: var(--header-text);
             color: var(--header-bg);
+            box-shadow: none;
         }
 
         .main-container {
@@ -123,6 +142,7 @@
             border: 3px double var(--border-color);
             padding: 25px;
             position: relative;
+            box-shadow: 0 6px 18px var(--shadow-color);
         }
 
         .panel-title {
@@ -131,10 +151,10 @@
             margin-bottom: 25px;
             text-transform: uppercase;
             text-align: center;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-            color: var(--text-color);
+            padding-bottom: 10px;
+            color: var(--accent-color);
         }
 
         .form-group {
@@ -143,16 +163,17 @@
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 7px;
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.4px;
             color: var(--text-muted);
         }
 
         input, select {
             width: 100%;
-            padding: 10px;
+            padding: 11px;
             background-color: var(--input-bg);
             border: 2px solid var(--border-color);
             color: var(--text-color);
@@ -160,11 +181,18 @@
             font-weight: 700;
             font-family: monospace;
             border-radius: 0;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--highlight-bg);
         }
 
         .result-item {
@@ -182,6 +210,7 @@
         .result-label {
             font-size: 0.9rem;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
             font-weight: 700;
             color: var(--text-muted);
         }
@@ -206,26 +235,49 @@
             background-color: var(--panel-bg);
             border: 3px double var(--border-color);
             padding: 22px;
+            box-shadow: 0 6px 18px var(--shadow-color);
         }
 
         .notice-section h3 {
             margin-bottom: 12px;
             text-transform: uppercase;
-            color: var(--text-color);
+            letter-spacing: 0.5px;
+            color: var(--accent-color);
             font-size: 0.95rem;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
+            padding-bottom: 8px;
         }
 
         .notice-section ol {
             padding-left: 20px;
             color: var(--text-muted);
             font-size: 0.85rem;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         .notice-section li {
             margin-bottom: 6px;
+        }
+
+        footer.site-footer {
+            margin-top: 25px;
+            text-align: center;
+            padding: 14px 0 4px;
+            font-size: 0.78rem;
+            letter-spacing: 0.3px;
+            color: var(--text-muted);
+        }
+
+        footer.site-footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--border-color);
+            transition: color 0.18s, border-color 0.18s;
+        }
+
+        footer.site-footer a:hover {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
         }
     </style>
 </head>
@@ -308,6 +360,10 @@
         </ol>
     </div>
 
+    <footer class="site-footer">
+        <a href="https://github.com/rpmn0ise/iron-nest-calculator" target="_blank" rel="noopener noreferrer" id="credit-link">Créé par rpmn0ise</a>
+    </footer>
+
     <script>
         // Table balistique
         const balisticTable = {
@@ -332,7 +388,8 @@
                     "Saisissez ces valeurs dans la partie gauche du calculateur (ou utilisez [/] et [*] sur le pavé numérique).",
                     "Vérifiez l'élévation, le temps de vol de l'obus ainsi que la dispersion théorique à droite.",
                     "Ajustez vos équipements en jeu et ouvrez le feu !"
-                ]
+                ],
+                credit_text: "Créé par rpmn0ise"
             },
             en: {
                 title: "Iron Nest - Ballistic Calculator", inputs: "Input Data",
@@ -346,7 +403,8 @@
                     "Enter these values on the left side (or use [/] and [*] on your Numpad).",
                     "Review target elevation, shell travel time and expected dispersion radius on the right.",
                     "Set your in-game station and fire!"
-                ]
+                ],
+                credit_text: "Created by rpmn0ise"
             },
             de: {
                 title: "Iron Nest - Ballistischer Rechner", inputs: "Eingabedaten",
@@ -360,7 +418,8 @@
                     "Geben Sie diese Werte auf der linken Seite ein (oder nutzen Sie [/] und [*] auf dem Nummernblock).",
                     "Überprüfen Sie die Geschützerhöhung, Flugzeit der Granate sowie den theoretischen Streuradius rechts.",
                     "Stellen Sie Ihre Station im Spiel ein und feuern Sie!"
-                ]
+                ],
+                credit_text: "Erstellt von rpmn0ise"
             },
             ru: {
                 title: "Iron Nest - Баллистический Калькулятор", inputs: "Входные Данные",
@@ -374,7 +433,8 @@
                     "Введите эти значения в левой части калькулятора (или используйте [/] и [*] на цифровой клавиатуре).",
                     "Проверьте угол наклона орудия, время полета снаряда и теоретический разброс справа.",
                     "Настройте ваше орудие в игре и открывайте огонь!"
-                ]
+                ],
+                credit_text: "Создано rpmn0ise"
             },
             zh: {
                 title: "Iron Nest - 弹道 Моделирование 计算器", inputs: "输入数据",
@@ -388,7 +448,8 @@
                     "在计算器左侧输入这些数值（或使用小键盘上的 [/] 和 [*]）。",
                     "确认右侧显示的火炮仰角、炮弹飞行时间以及理论散布半径。",
                     "调整您的游戏内炮位并开火！"
-                ]
+                ],
+                credit_text: "由 rpmn0ise 创建"
             }
         };
 
@@ -482,6 +543,7 @@
             document.getElementById('res-time-lbl').innerText = data.time_lbl;
             document.getElementById('res-dispersion-lbl').innerText = data.dispersion_lbl;
             document.getElementById('notice-title').innerText = data.notice_title;
+            document.getElementById('credit-link').innerText = data.credit_text;
 
             const stepsOl = document.getElementById('notice-steps');
             stepsOl.innerHTML = "";
