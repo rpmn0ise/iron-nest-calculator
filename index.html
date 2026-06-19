@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iron Nest - Balistic Calculator</title>
+    <title>Iron Nest - Calculateur Balistique</title>
+
+    <meta name="description" content="Calculateur balistique externe pour Iron Nest. Saisissez distance et azimut, obtenez instantanément l'élévation du canon, les charges propulsives et le temps de vol de l'obus. Outil gratuit, ultra-léger, pensé pour un second écran.">
+
+    <!-- Open Graph / Facebook, Discord, etc. -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://iron-nest-calculator.pages.dev/">
+    <meta property="og:title" content="Iron Nest - Calculateur Balistique">
+    <meta property="og:description" content="Calculateur balistique externe pour Iron Nest. Distance et azimut → élévation, charges propulsives et temps de vol instantanés. Idéal pour un second écran.">
+    <meta property="og:image" content="https://iron-nest-calculator.pages.dev/og-cover.png">
+    <meta property="og:locale" content="fr_FR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Iron Nest - Calculateur Balistique">
+    <meta name="twitter:description" content="Distance et azimut → élévation, charges propulsives et temps de vol instantanés. Outil externe gratuit pour Iron Nest.">
+    <meta name="twitter:image" content="https://iron-nest-calculator.pages.dev/og-cover.png">
+
     <style>
         :root {
             /* --- THEME SOMBRE RADICAL (Bunker de nuit) --- */
@@ -65,20 +82,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 24px;
+            padding: 15px 20px;
             background-color: var(--header-bg);
             color: var(--header-text);
             border: 3px double var(--border-color);
             margin-bottom: 25px;
-            box-shadow: 0 4px 14px var(--shadow-color);
         }
 
         h1 {
             font-size: 1.3rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            text-shadow: 0 0 12px var(--highlight-bg);
+            letter-spacing: 1px;
         }
 
         .controls {
@@ -91,25 +106,18 @@
             background-color: var(--panel-bg);
             color: var(--text-color);
             border: 2px solid var(--border-color);
-            padding: 7px 14px;
+            padding: 6px 12px;
             cursor: pointer;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            transition: all 0.18s ease;
+            transition: all 0.2s;
             border-radius: 0;
         }
 
-        button:hover, select.select-lang:hover {
+        button:hover {
             background-color: var(--accent-color);
             color: #ffffff;
             border-color: var(--accent-color);
-            box-shadow: 0 0 10px var(--highlight-bg);
-        }
-
-        button:active {
-            transform: translateY(1px);
         }
 
         header button, header select.select-lang {
@@ -121,7 +129,6 @@
         header button:hover, header select.select-lang:hover {
             background-color: var(--header-text);
             color: var(--header-bg);
-            box-shadow: none;
         }
 
         .main-container {
@@ -142,7 +149,6 @@
             border: 3px double var(--border-color);
             padding: 25px;
             position: relative;
-            box-shadow: 0 6px 18px var(--shadow-color);
         }
 
         .panel-title {
@@ -151,10 +157,10 @@
             margin-bottom: 25px;
             text-transform: uppercase;
             text-align: center;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-            color: var(--accent-color);
+            padding-bottom: 8px;
+            color: var(--text-color);
         }
 
         .form-group {
@@ -163,17 +169,16 @@
 
         label {
             display: block;
-            margin-bottom: 7px;
+            margin-bottom: 6px;
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
             color: var(--text-muted);
         }
 
         input, select {
             width: 100%;
-            padding: 11px;
+            padding: 10px;
             background-color: var(--input-bg);
             border: 2px solid var(--border-color);
             color: var(--text-color);
@@ -181,18 +186,11 @@
             font-weight: 700;
             font-family: monospace;
             border-radius: 0;
-            transition: border-color 0.18s, box-shadow 0.18s;
-        }
-
-        input::placeholder {
-            color: var(--text-muted);
-            opacity: 0.7;
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px var(--highlight-bg);
         }
 
         .result-item {
@@ -210,7 +208,6 @@
         .result-label {
             font-size: 0.9rem;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
             font-weight: 700;
             color: var(--text-muted);
         }
@@ -235,49 +232,26 @@
             background-color: var(--panel-bg);
             border: 3px double var(--border-color);
             padding: 22px;
-            box-shadow: 0 6px 18px var(--shadow-color);
         }
 
         .notice-section h3 {
             margin-bottom: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--accent-color);
+            color: var(--text-color);
             font-size: 0.95rem;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .notice-section ol {
             padding-left: 20px;
             color: var(--text-muted);
             font-size: 0.85rem;
-            line-height: 1.7;
+            line-height: 1.6;
         }
 
         .notice-section li {
             margin-bottom: 6px;
-        }
-
-        footer.site-footer {
-            margin-top: 25px;
-            text-align: center;
-            padding: 14px 0 4px;
-            font-size: 0.78rem;
-            letter-spacing: 0.3px;
-            color: var(--text-muted);
-        }
-
-        footer.site-footer a {
-            color: var(--text-muted);
-            text-decoration: none;
-            border-bottom: 1px dashed var(--border-color);
-            transition: color 0.18s, border-color 0.18s;
-        }
-
-        footer.site-footer a:hover {
-            color: var(--accent-color);
-            border-color: var(--accent-color);
         }
     </style>
 </head>
@@ -360,10 +334,6 @@
         </ol>
     </div>
 
-    <footer class="site-footer">
-        <a href="https://github.com/rpmn0ise/iron-nest-calculator" target="_blank" rel="noopener noreferrer" id="credit-link">Créé par rpmn0ise</a>
-    </footer>
-
     <script>
         // Table balistique
         const balisticTable = {
@@ -388,8 +358,7 @@
                     "Saisissez ces valeurs dans la partie gauche du calculateur (ou utilisez [/] et [*] sur le pavé numérique).",
                     "Vérifiez l'élévation, le temps de vol de l'obus ainsi que la dispersion théorique à droite.",
                     "Ajustez vos équipements en jeu et ouvrez le feu !"
-                ],
-                credit_text: "Créé par rpmn0ise"
+                ]
             },
             en: {
                 title: "Iron Nest - Ballistic Calculator", inputs: "Input Data",
@@ -403,8 +372,7 @@
                     "Enter these values on the left side (or use [/] and [*] on your Numpad).",
                     "Review target elevation, shell travel time and expected dispersion radius on the right.",
                     "Set your in-game station and fire!"
-                ],
-                credit_text: "Created by rpmn0ise"
+                ]
             },
             de: {
                 title: "Iron Nest - Ballistischer Rechner", inputs: "Eingabedaten",
@@ -418,8 +386,7 @@
                     "Geben Sie diese Werte auf der linken Seite ein (oder nutzen Sie [/] und [*] auf dem Nummernblock).",
                     "Überprüfen Sie die Geschützerhöhung, Flugzeit der Granate sowie den theoretischen Streuradius rechts.",
                     "Stellen Sie Ihre Station im Spiel ein und feuern Sie!"
-                ],
-                credit_text: "Erstellt von rpmn0ise"
+                ]
             },
             ru: {
                 title: "Iron Nest - Баллистический Калькулятор", inputs: "Входные Данные",
@@ -433,8 +400,7 @@
                     "Введите эти значения в левой части калькулятора (или используйте [/] и [*] на цифровой клавиатуре).",
                     "Проверьте угол наклона орудия, время полета снаряда и теоретический разброс справа.",
                     "Настройте ваше орудие в игре и открывайте огонь!"
-                ],
-                credit_text: "Создано rpmn0ise"
+                ]
             },
             zh: {
                 title: "Iron Nest - 弹道 Моделирование 计算器", inputs: "输入数据",
@@ -448,8 +414,7 @@
                     "在计算器左侧输入这些数值（或使用小键盘上的 [/] 和 [*]）。",
                     "确认右侧显示的火炮仰角、炮弹飞行时间以及理论散布半径。",
                     "调整您的游戏内炮位并开火！"
-                ],
-                credit_text: "由 rpmn0ise 创建"
+                ]
             }
         };
 
@@ -543,7 +508,6 @@
             document.getElementById('res-time-lbl').innerText = data.time_lbl;
             document.getElementById('res-dispersion-lbl').innerText = data.dispersion_lbl;
             document.getElementById('notice-title').innerText = data.notice_title;
-            document.getElementById('credit-link').innerText = data.credit_text;
 
             const stepsOl = document.getElementById('notice-steps');
             stepsOl.innerHTML = "";
